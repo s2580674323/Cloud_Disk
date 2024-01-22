@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/close.png</file>
+        <file>res/settings.png</file>
+        <file>res/minwindow.png</file>
+        <file>res/directory.png</file>
+        <file>res/file.png</file>
+        <file>res/tray.png</file>
+    </qresource>
+</RCC>
