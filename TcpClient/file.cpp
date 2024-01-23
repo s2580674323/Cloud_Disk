@@ -211,9 +211,9 @@ void File::DownLoadFile(QString strCurPath, QString fileName, QString strSaveFil
 
 void File::clickedCreateDirBtn()
 {// 新的文件夹名，用户名，当前目录
-    QString newDirName = QInputDialog::getText(this, "新建文件夹", "新文件夹名字(中文不能超过10个字符)");
+    QString newDirName = QInputDialog::getText(this, "新建文件夹", "新文件夹名字(中文不能超过40个字符)");
     if(newDirName.isEmpty()) return;
-    if(newDirName.toStdString().size() > STR_MAX_SIZE) {
+    if(newDirName.toStdString().size() > STR_MAX_SIZE - 1) {
         QMessageBox::information(this, "新建文件夹失败", "请按要求输入新建的文件夹名");
         return;
     }
@@ -221,8 +221,8 @@ void File::clickedCreateDirBtn()
     QString curPath = TcpClient::getInstance()->getCurrentFilePath();
     PDU *pdu = mkPDU(curPath.toStdString().size() + 1);
     pdu->uiMsgType = ENUM_MSG_TYPE_CREATE_DIR_REQUEST;
-    memcpy(pdu->cData, userName.toStdString().c_str(), 32);
-    memcpy(pdu->cData + 32, newDirName.toStdString().c_str(), 32);
+    memcpy(pdu->cData, userName.toStdString().c_str(), userName.toStdString().size());
+    memcpy(pdu->cData + STR_MAX_SIZE, newDirName.toStdString().c_str(), newDirName.toStdString().size());
     memcpy(pdu->cMsg, curPath.toStdString().c_str(), curPath.toStdString().size());
     TcpClient::getInstance()->getTcpSocket()->write((char*)pdu, pdu->uiPDULen);
     free(pdu);pdu = nullptr;
@@ -261,7 +261,7 @@ void File::clickedRenameDirBtn()
     if(m_pFileListW->currentItem() == nullptr) return;
     QString newName = QInputDialog::getText(this, "重命名", "请输入新名字\n"
                                                          "注意事项: \n"
-                                                         "1.中文不能超过10个字符\n"
+                                                         "1.中文不能超过40个字符\n"
                                                          "2.修改名字时请添加上文件原后缀\n");
     QString strCurPath = TcpClient::getInstance()->getCurrentFilePath();
     if(newName.isEmpty() || strCurPath.isEmpty()) return;
@@ -275,7 +275,7 @@ void File::clickedRenameDirBtn()
     PDU *pdu = mkPDU(strCurPath.toStdString().size() + 1);
     pdu->uiMsgType = ENUM_MSG_TYPE_RENAME_DIR_OR_FILE_REQUEST;
     memcpy(pdu->cData, fileName.toStdString().c_str(), fileName.toStdString().size());
-    memcpy(pdu->cData + 32, newName.toStdString().c_str(), newName.toStdString().size());
+    memcpy(pdu->cData + STR_MAX_SIZE, newName.toStdString().c_str(), newName.toStdString().size());
     memcpy(pdu->cMsg, strCurPath.toStdString().c_str(), strCurPath.toStdString().size());
     TcpClient::getInstance()->getTcpSocket()->write((char*)pdu, pdu->uiPDULen);
     free(pdu); pdu = nullptr;
@@ -336,7 +336,7 @@ void File::clickedUpLoadFileBtn() // 发送上传文件请求
     QString fileName = m_strFilePath.mid(pos + 1);//返回从pos+1往后的所有字符,  right(n)，返回后n个字符
 //    qDebug() << m_strFilePath << fileName;
     if(fileName.toStdString().size() > STR_MAX_SIZE - 1) {
-        QMessageBox::information(this, "prompt", "请缩减文件名长度再进行上传(中文不能超过10个字符)");
+        QMessageBox::information(this, "prompt", "请缩减文件名长度再进行上传(中文不能超过40个字符)");
         return;
     }
 

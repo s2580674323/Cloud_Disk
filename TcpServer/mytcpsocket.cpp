@@ -31,9 +31,9 @@ void MyTcpSocket::recv_Msg()
         switch (pdu->uiMsgType) {
         case ENUM_MSG_TYPE_REGISTER_REQUEST: // 注册请求
         {
-            char sName[32], sPwd[32];
-            strncpy(sName, pdu->cData, 32);
-            strncpy(sPwd, pdu->cData + 32, 32);
+            char sName[STR_MAX_SIZE] = {}, sPwd[STR_MAX_SIZE] = {};
+            strncpy(sName, pdu->cData, STR_MAX_SIZE);
+            strncpy(sPwd, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             bool ok = useDB::getInstance()->Register(sName, sPwd);
             respondPDU->uiMsgType = ENUM_MSG_TYPE_REGISTER_RESPOND;
             if(ok) {
@@ -51,9 +51,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_LOGIN_REQUEST: // 登录请求
         {
-            char sName[32], sPwd[32];
-            strncpy(sName, pdu->cData, 32);
-            strncpy(sPwd, pdu->cData + 32, 32);
+            char sName[STR_MAX_SIZE], sPwd[STR_MAX_SIZE];
+            strncpy(sName, pdu->cData, STR_MAX_SIZE);
+            strncpy(sPwd, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             bool ok = useDB::getInstance()->Login(sName, sPwd);
             respondPDU->uiMsgType = ENUM_MSG_TYPE_LOGIN_RESPOND;
             if(ok) {
@@ -69,12 +69,12 @@ void MyTcpSocket::recv_Msg()
         case ENUM_MSG_TYPE_ALL_ONLINE_REQUEST: // 查看在线用户, PDU的msg不为空
         {
             QStringList res = useDB::getInstance()->ShowAllOnline();
-            uint uiMsgLen = res.size() * 32; //一个名字不超过32字节，中文名不能超过10个字符
+            uint uiMsgLen = res.size() * STR_MAX_SIZE; //一个名字不超过STR_MAX_SIZE字节
             PDU *respdu = mkPDU(uiMsgLen); // 按大小创建PDU
             respdu->uiMsgType = ENUM_MSG_TYPE_ALL_ONLINE_RESPOND;
             for(int i = 0; i < res.size(); ++i) {
                 //                                      调用c_str()得到的就是char*的首地址
-                memcpy((char *)(respdu->cMsg) + i * 32, res.at(i).toStdString().c_str(),
+                memcpy((char *)(respdu->cMsg) + i * STR_MAX_SIZE, res.at(i).toStdString().c_str(),
                        res.at(i).toUtf8().size());// QSring调用size得到的是字符数，不是字节数
             }
             this->write((char*)respdu, respdu->uiPDULen);
@@ -99,9 +99,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_ADD_FRIEND_REQUEST:  // 添加好友, 在线用户就进行转发好友请求
         {
-            char myName[32], friName[32];
-            strncpy(friName, pdu->cData, 32);
-            strncpy(myName, pdu->cData + 32, 32);
+            char myName[STR_MAX_SIZE] = {}, friName[STR_MAX_SIZE] = {};
+            strncpy(friName, pdu->cData, STR_MAX_SIZE);
+            strncpy(myName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             int res = useDB::getInstance()->AddFriend(friName, myName);
             respondPDU->uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_RESPOND;
             if(res == 1) {  // 在线
@@ -124,9 +124,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_ADD_FRIEND_AGREE: // 同意添加好友，更新数据库，并通知申请者
         {
-            char myName[32], friName[32];
-            strncpy(friName, pdu->cData, 32);
-            strncpy(myName, pdu->cData + 32, 32);
+            char myName[STR_MAX_SIZE] = {}, friName[STR_MAX_SIZE] = {};
+            strncpy(friName, pdu->cData, STR_MAX_SIZE);
+            strncpy(myName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             useDB::getInstance()->UpdateAgreeAddFriend(friName, myName);
 
             respondPDU->uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
@@ -141,15 +141,15 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_FLUSH_FRIEND_REQUEST: // 刷新在线好友的列表, Msg不为空
         {
-            char myName[32];
+            char myName[STR_MAX_SIZE] = {};
             strcpy(myName, pdu->cData);
             QStringList AllFriend = useDB::getInstance()->FlushFriend(myName);
-            uint uiMsgLen = AllFriend.size() * 32; //一个名字不超过32字节，中文名不能超过10个字符
+            uint uiMsgLen = AllFriend.size() * STR_MAX_SIZE; //一个名字不超过STR_MAX_SIZE字节
             PDU *respdu = mkPDU(uiMsgLen); // 按大小创建PDU
             respdu->uiMsgType = ENUM_MSG_TYPE_FLUSH_FRIEND_RESPOND;
             for(int i = 0; i < AllFriend.size(); ++i) {
                 //                                      调用c_str()得到的就是char*的首地址
-                memcpy((char *)(respdu->cMsg) + i * 32, AllFriend.at(i).toStdString().c_str(),
+                memcpy((char *)(respdu->cMsg) + i * STR_MAX_SIZE, AllFriend.at(i).toStdString().c_str(),
                        AllFriend.at(i).toUtf8().size());// QSring调用size得到的是字符数，不是字节数
             }
             this->write((char*)respdu, respdu->uiPDULen);
@@ -158,9 +158,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_DELETE_FRIEND_REQUEST: // 删除好友
         {
-            char myName[32], friName[32];
-            strncpy(friName, pdu->cData, 32);
-            strncpy(myName, pdu->cData + 32, 32);
+            char myName[STR_MAX_SIZE] = {}, friName[STR_MAX_SIZE] = {};
+            strncpy(friName, pdu->cData, STR_MAX_SIZE);
+            strncpy(myName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             bool res = useDB::getInstance()->DeleteFriend(friName, myName);
             respondPDU->uiMsgType = ENUM_MSG_TYPE_DELETE_FRIEND_RESPOND;
             if(res) {
@@ -171,8 +171,8 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_PRIVATE_CHAT_REQUEST: // 请求私聊
         {
-            char friName[32];
-            strncpy(friName, pdu->cData, 32);
+            char friName[STR_MAX_SIZE];
+            strncpy(friName, pdu->cData, STR_MAX_SIZE);
             MyTcpServer::getInstance()->Transpond(friName, pdu);
 
             break;
@@ -191,8 +191,8 @@ void MyTcpSocket::recv_Msg()
             bool res = dir.exists(CurPath);
             respondPDU->uiMsgType = ENUM_MSG_TYPE_CREATE_DIR_RESPOND;
             if(res) { // 用户当前所在的目录存在
-                char newDirName[32] = {};
-                memcpy(newDirName, pdu->cData + 32, 32);
+                char newDirName[STR_MAX_SIZE] = {};
+                memcpy(newDirName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
                 QString nextPath = QString("%1/%2").arg(CurPath).arg(newDirName);
                 res = dir.exists(nextPath);
                 if(res) { // 要创建的文件夹已存在
@@ -265,9 +265,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_RENAME_DIR_OR_FILE_REQUEST:  // 重命名
         {// fileName  newName
-            char fileName[32] = {}, newName[32] = {};
-            memcpy(fileName, pdu->cData, 32);
-            memcpy(newName, pdu->cData + 32, 32);
+            char fileName[STR_MAX_SIZE] = {}, newName[STR_MAX_SIZE] = {};
+            memcpy(fileName, pdu->cData, STR_MAX_SIZE);
+            memcpy(newName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             QString curPath = QString((char*)pdu->cMsg);
     //        QFileInfo fileInfo(filePath);
             QDir dir;
@@ -391,9 +391,9 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_SHARE_FILE_REQUEST:  // 转发分享文件的请求
         {
-            char receiverName[32] = {}, senderName[32];
-            memcpy(receiverName, pdu->cData, 32);
-            memcpy(senderName, pdu->cData + 32, 32);
+            char receiverName[STR_MAX_SIZE] = {}, senderName[STR_MAX_SIZE] = {};
+            memcpy(receiverName, pdu->cData, STR_MAX_SIZE);
+            memcpy(senderName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             QString shareFilePath = QString((char*)pdu->cMsg);
 //            qDebug() << receiverName << senderName << shareFilePath;
             QFile file(shareFilePath);
@@ -411,8 +411,8 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_SHARE_FILE_AGREE:  // 转发分享文件的回复:好友同意接收
         {
-            char senderName[32];
-            memcpy(senderName, pdu->cData + 32, 32);
+            char senderName[STR_MAX_SIZE];
+            memcpy(senderName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             // 修改pdu为回复状态，且cData存回复内容
             pdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_RESPOND;
             memset(pdu->cData, 0, sizeof(pdu->cData));
@@ -422,8 +422,8 @@ void MyTcpSocket::recv_Msg()
         }
         case ENUM_MSG_TYPE_SHARE_FILE_REFUSE:  // 转发分享文件的回复:好友拒绝接收
         {
-            char senderName[32];
-            memcpy(senderName, pdu->cData + 32, 32);
+            char senderName[STR_MAX_SIZE] = {};
+            memcpy(senderName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
             // 修改pdu为回复状态，且cData存回复内容
             pdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_RESPOND;
             memset(pdu->cData, 0, sizeof(pdu->cData));

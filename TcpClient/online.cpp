@@ -49,10 +49,10 @@ void Online::ShowUsr(PDU *pdu)
 {
     if(pdu == nullptr) return;
     ui->listWidget->clear();
-    uint uiSize = pdu->uiMsgLen/32;
-    char ctmp[32];
+    uint uiSize = pdu->uiMsgLen/STR_MAX_SIZE;
+    char ctmp[STR_MAX_SIZE] = {};
     for(uint i = 0; i < uiSize; ++i) {
-        memcpy(ctmp, (char*)(pdu->cMsg)+i*32, 32);
+        memcpy(ctmp, (char*)(pdu->cMsg)+i*STR_MAX_SIZE, STR_MAX_SIZE);
         ui->listWidget->addItem(ctmp);
     }
 }
@@ -70,7 +70,7 @@ void Online::AddFriend()
     pdu->uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_REQUEST;
     // cData 中，前边是要添加的用户名字，后边是申请者的名字
     memcpy(pdu->cData, usrname.toStdString().c_str(), usrname.toStdString().size());
-    memcpy(pdu->cData + 32, myname.toStdString().c_str(), myname.toStdString().size());
+    memcpy(pdu->cData + STR_MAX_SIZE, myname.toStdString().c_str(), myname.toStdString().size());
     TcpClient::getInstance()->getTcpSocket()->write((char *)pdu, pdu->uiPDULen);
     free(pdu);
     pdu = nullptr;

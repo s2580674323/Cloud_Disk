@@ -227,13 +227,13 @@ void TcpClient::recv_Msg()
     }
     case ENUM_MSG_TYPE_ADD_FRIEND_REQUEST: // 收到由服务器转发的添加好友请求
     {
-        char applicantName[32];
-        strncpy(applicantName, pdu->cData + 32, 32); // applicationName 用户申请添加好友
+        char applicantName[STR_MAX_SIZE] = {0};
+        strncpy(applicantName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE); // applicationName 用户申请添加好友
         int res = QMessageBox::information(this, "提示", QString("%1 请求添加好友").arg(applicantName),
                                            QMessageBox::Yes, QMessageBox::No);
         // 把用户选择回复给服务器
         PDU *respdu = mkPDU(0);
-        memcpy(respdu->cData, pdu->cData, 64); // 前边是要添加的用户名字，后边是申请者的名字
+        memcpy(respdu->cData, pdu->cData, STR_MAX_SIZE * 2); // 前边是要添加的用户名字，后边是申请者的名字
         if(res == QMessageBox::Yes) {
             respdu->uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
         }
@@ -275,8 +275,8 @@ void TcpClient::recv_Msg()
     case ENUM_MSG_TYPE_PRIVATE_CHAT_REQUEST: // 收到由服务器转发的私聊请求
     {
         // 接收来自application用户的私聊请求
-        char applicantName[32];
-        strncpy(applicantName, pdu->cData + 32, 32); // applicationName 用户发起聊天
+        char applicantName[STR_MAX_SIZE] = {};
+        strncpy(applicantName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE); // applicationName 用户发起聊天
 
         // 找到与application对话的私聊窗
         QList<PrivateChatWidget *> &m_pChatList = UserHomeWidget::getInstance()->getFriend()->getChatList();
@@ -394,9 +394,9 @@ void TcpClient::recv_Msg()
     }
     case ENUM_MSG_TYPE_SHARE_FILE_REQUEST: // 接受好友发来的分享文件请求
     {
-        char receiverName[32] = {}, senderName[32];
-        memcpy(receiverName, pdu->cData, 32);
-        memcpy(senderName, pdu->cData + 32, 32);
+        char receiverName[STR_MAX_SIZE] = {}, senderName[STR_MAX_SIZE];
+        memcpy(receiverName, pdu->cData, STR_MAX_SIZE);
+        memcpy(senderName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
         QString shareFilePath = QString((char*)pdu->cMsg);
 //        qDebug() << shareFilePath;
         int pos = shareFilePath.lastIndexOf("/");
@@ -406,8 +406,8 @@ void TcpClient::recv_Msg()
                               QString("您的好友%1分享文件%2，是否接收").arg(senderName).arg(fileName),
                               QMessageBox::Yes | QMessageBox::No);
         PDU *respdu = mkPDU(0);
-        memcpy(respdu->cData, receiverName, 32);
-        memcpy(respdu->cData + 32, senderName, 32);
+        memcpy(respdu->cData, receiverName, STR_MAX_SIZE);
+        memcpy(respdu->cData + STR_MAX_SIZE, senderName, STR_MAX_SIZE);
         if(reply == QMessageBox::Yes) {
             respdu->uiMsgType = ENUM_MSG_TYPE_SHARE_FILE_AGREE;
 
@@ -541,19 +541,19 @@ void TcpClient::clickedBtnRegister() // 注册
         QMessageBox::information(this, "Error", "请填写完整账号和密码");
         return;
     }
-    if(userName.toStdString().size() > STR_MAX_SIZE) {
+    if(userName.toStdString().size() > STR_MAX_SIZE - 1) {
         QMessageBox::information(this, "prompt", "用户名过长，请进行修改");
         return;
     }
-    if(pwd.toStdString().size() > STR_MAX_SIZE) {
+    if(pwd.toStdString().size() > STR_MAX_SIZE - 1) {
         QMessageBox::information(this, "prompt", "密码过长，请进行修改");
         return;
     }
     PDU *pdu = mkPDU(0); // 只需要用固定部分
     pdu->uiMsgType = ENUM_MSG_TYPE_REGISTER_REQUEST; // 请求注册
     // 区别strncpy和strcpy，前者有第三个参数指定要复制的字节个数，后者没有
-    strncpy(pdu->cData, userName.toStdString().c_str(), 32);
-    strncpy(pdu->cData+32, pwd.toStdString().c_str(), 32);
+    strncpy(pdu->cData, userName.toStdString().c_str(), userName.toStdString().size());
+    strncpy(pdu->cData + STR_MAX_SIZE, pwd.toStdString().c_str(), pwd.toStdString().size());
     m_TcpSocket->write((char*)pdu, pdu->uiPDULen);
     free(pdu);
     pdu = nullptr;
@@ -573,8 +573,8 @@ void TcpClient::clickedBtnLogin() // 登录
     PDU *pdu = mkPDU(0); // 只需要用固定部分
     pdu->uiMsgType = ENUM_MSG_TYPE_LOGIN_REQUEST; // 请求登录
     // 区别strncpy和strcpy，前者有第三个参数指定要复制的字节个数，后者没有
-    strncpy(pdu->cData, userName.toStdString().c_str(), 32);
-    strncpy(pdu->cData+32, pwd.toStdString().c_str(), 32);
+    strncpy(pdu->cData, userName.toStdString().c_str(), STR_MAX_SIZE);
+    strncpy(pdu->cData + STR_MAX_SIZE, pwd.toStdString().c_str(), STR_MAX_SIZE);
     m_TcpSocket->write((char*)pdu, pdu->uiPDULen);
     free(pdu);pdu = nullptr;
 }

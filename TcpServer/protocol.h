@@ -2,13 +2,11 @@
 #define PROTOCOL_H
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 
 typedef unsigned int uint;
 
-#define STR_MAX_SIZE 30
-
+#define STR_MAX_SIZE 128
 
 #define SYSTEM_ERROR "system error"
 
@@ -22,11 +20,11 @@ typedef unsigned int uint;
 #define ADD_FRIEND_EXISTED "friend existed"
 #define ADD_FRIEND_OFFLINE "added user offline"
 #define DELETE_FRIEND_OK "delete friend ok"
-#define USER_CURRENT_DIR_NOT_EXIST "user current directory not exist"
+#define USER_CURRENT_DIR_NOT_EXIST "user current dir not exist"
 #define NEW_DIR_EXISTED "new dir existed"
-#define CREATE_NEW_DIR_OK "create new directory ok"
-#define DELETE_DIR_OK "delete the directory ok"
-#define DELETE_DIR_FAILED "delete the directory failed"
+#define CREATE_NEW_DIR_OK "create new dir ok"
+#define DELETE_DIR_OK "delete the dir ok"
+#define DELETE_DIR_FAILED "delete the dir failed"
 #define DELETE_DIR_ERROR "please choose directory not file"
 #define RENAME_DIR_OK "rename directory ok"
 #define RENAME_DIR_FAILED "rename directory failed"
@@ -57,7 +55,7 @@ enum ENUM_MSG_TYPE // 消息类型是无符号整形，即占32位
     ENUM_MSG_TYPE_REGISTER_REQUEST,     // 注册请求
     ENUM_MSG_TYPE_REGISTER_RESPOND,      // 注册回复
 
-    ENUM_MSG_TYPE_LOGIN_REQUEST,       // 登录请求
+    ENUM_MSG_TYPE_LOGIN_REQUEST,        // 登录请求
     ENUM_MSG_TYPE_LOGIN_RESPOND,        // 登录回复
 
     ENUM_MSG_TYPE_ALL_ONLINE_REQUEST,   // 所有在线用户请求
@@ -113,9 +111,9 @@ enum ENUM_MSG_TYPE // 消息类型是无符号整形，即占32位
     ENUM_MSG_TYPE_SHARE_FILE_AGREE,    // 同意接收分享的文件
     ENUM_MSG_TYPE_SHARE_FILE_REFUSE,   // 拒绝接收分享的文件
 
-
     ENUM_MSG_TYPE_MOVE_FILE_REQUEST,   // 移动文件的请求
     ENUM_MSG_TYPE_MOVE_FILE_RESPOND,   // 移动文件的回复
+
 
     ENUM_MSG_TYPE_TEST_DELAY_REQUEST,   // 测试服务器与客户端延迟的请求
     ENUM_MSG_TYPE_TEST_DELAY_RESPOND,   //测试服务器与客户端延迟的回复
@@ -124,16 +122,15 @@ enum ENUM_MSG_TYPE // 消息类型是无符号整形，即占32位
 };
 
 struct PDU {
-    uint uiPDULen;   // 总的协议数据单元的大小
-    uint uiMsgType;  // 消息类型
-    char cData[64]; // 文件名，用户名，密码等
-    uint uiMsgLen;   // 实际消息长度
+    uint uiPDULen;   // 32字节，总的协议数据单元的大小
+    uint uiMsgType;  // 32字节，消息类型
+    char cData[STR_MAX_SIZE * 2];  // STR_MAX_SIZE * 2字节，文件名，用户名，密码等
+    uint uiMsgLen;   // 32字节，实际消息长度
 
-    int cMsg[];     // 实际消息，作为变长结构体的动态部分
+    int cMsg[];      // 实际消息，作为变长结构体的动态部分
 };
-
 struct FileInfo{
-    char cName[32];
+    char cName[STR_MAX_SIZE];
     int iFileType;
 };
 

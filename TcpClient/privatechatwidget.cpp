@@ -74,8 +74,8 @@ void PrivateChatWidget::setChatName(QString friName)
 void PrivateChatWidget::updateMsg(const PDU *pdu)
 {
     if(pdu == nullptr) return;
-    char SenderName[32];
-    memcpy(SenderName, pdu->cData + 32, 32);
+    char SenderName[STR_MAX_SIZE];
+    memcpy(SenderName, pdu->cData + STR_MAX_SIZE, STR_MAX_SIZE);
     QString strMsg = QString("%1 : %2").arg(SenderName).arg((char*)pdu->cMsg);
     ui->textEdit_ShowMessage->append(strMsg);
 }
@@ -96,7 +96,7 @@ void PrivateChatWidget::clickedBtnSendMessage()
     PDU *pdu = mkPDU(Message.toUtf8().size() + 1);
     pdu->uiMsgType = ENUM_MSG_TYPE_PRIVATE_CHAT_REQUEST;
     memcpy(pdu->cData, m_friName.toStdString().c_str(), m_friName.toStdString().size());
-    memcpy(pdu->cData + 32, m_myName.toStdString().c_str(), m_myName.toStdString().size());
+    memcpy(pdu->cData + STR_MAX_SIZE, m_myName.toStdString().c_str(), m_myName.toStdString().size());
     memcpy(pdu->cMsg, Message.toStdString().c_str(), Message.toStdString().size());
     TcpClient::getInstance()->getTcpSocket()->write((char*)pdu, pdu->uiPDULen);
     free(pdu);pdu = nullptr;

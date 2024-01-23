@@ -161,7 +161,7 @@ void Friend::clickedSearchUserBtn()
     if(m_SearchName.isEmpty()) return;
     PDU *pdu = mkPDU(0);
     pdu->uiMsgType = ENUM_MSG_TYPE_SEARCH_USER_REQUEST;
-    memcpy(pdu->cData, (char*)m_SearchName.toStdString().c_str(), m_SearchName.toStdString().size());
+    memcpy(pdu->cData, (char*)m_SearchName.toStdString().c_str(), STR_MAX_SIZE);
     TcpClient::getInstance()->getTcpSocket()->write((char *)pdu, pdu->uiPDULen);
     free(pdu);
     pdu = nullptr;
@@ -189,7 +189,7 @@ void Friend::clickedDeleteFriendBtn()
         PDU *pdu = mkPDU(0);
         pdu->uiMsgType = ENUM_MSG_TYPE_DELETE_FRIEND_REQUEST;
         memcpy(pdu->cData, friName.toStdString().c_str(), friName.toStdString().size());
-        memcpy(pdu->cData + 32, myName.toStdString().c_str(), myName.toStdString().size());
+        memcpy(pdu->cData + STR_MAX_SIZE, myName.toStdString().c_str(), myName.toStdString().size());
         TcpClient::getInstance()->getTcpSocket()->write((char *)pdu, pdu->uiPDULen);
         free(pdu);pdu = nullptr;
     }

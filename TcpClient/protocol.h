@@ -6,7 +6,7 @@
 
 typedef unsigned int uint;
 
-#define STR_MAX_SIZE 30
+#define STR_MAX_SIZE 128
 
 #define SYSTEM_ERROR "system error"
 
@@ -118,22 +118,19 @@ enum ENUM_MSG_TYPE // 消息类型是无符号整形，即占32位
     ENUM_MSG_TYPE_TEST_DELAY_REQUEST,   // 测试服务器与客户端延迟的请求
     ENUM_MSG_TYPE_TEST_DELAY_RESPOND,   //测试服务器与客户端延迟的回复
 
-//    ENUM_MSG_TYPE_REQUEST,
-//    ENUM_MSG_TYPE_RESPOND,
-
     ENUM_MSG_TYPE_MAX = 0xffffffff
 };
 
 struct PDU {
     uint uiPDULen;   // 32字节，总的协议数据单元的大小
     uint uiMsgType;  // 32字节，消息类型
-    char cData[64];  // 64字节，文件名，用户名，密码等
+    char cData[STR_MAX_SIZE * 2];  // STR_MAX_SIZE * 2字节，文件名，用户名，密码等
     uint uiMsgLen;   // 32字节，实际消息长度
 
     int cMsg[];      // 实际消息，作为变长结构体的动态部分
 };
 struct FileInfo{
-    char cName[32];
+    char cName[STR_MAX_SIZE];
     int iFileType;
 };
 

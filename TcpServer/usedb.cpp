@@ -31,8 +31,8 @@ void useDB::init()
 
 
     QString createUserInfo = QString("create table if not exists userinfo(id int primary key auto_increment,"
-                             "name varchar(32) unique,"
-                             "pwd varchar(32),"
+                             "name varchar(128) unique,"
+                             "pwd varchar(128),"
                              "online integer default 0);"); // online禁止重复登录
     QString createFriend = QString("create table if not exists friend(id int, friendId int,"
                                    "primary key(id, friendId));");
@@ -43,7 +43,7 @@ void useDB::init()
 
     query.exec(createUserInfo);
     query.exec(createFriend);
-    query.exec(insertinfo);
+//    query.exec(insertinfo);
     query.exec(QString("select * from userinfo"));
     while(query.next()) {
         qDebug() << query.value(0).toInt() << " " << query.value(1).toString()  << query.value(2).toString()
